@@ -1,0 +1,13 @@
+# Large data files
+True.csv
+Fake.csv
+combined_dataset.csv
+cleaned_dataset.csv
+
+# Model/vector files (optional - these are also somewhat large)
+X_features.pkl
+y_labels.pkl
+
+# Python cache
+__pycache__/
+*.pyc
