@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Offline Science & Finance Guard",
+  "version": "1.0",
+  "description": "Scans selected text for verification directly on your local device.",
+  "permissions": [
+    "contextMenus",
+    "notifications"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  }
+}
