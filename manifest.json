@@ -5,9 +5,20 @@
   "description": "Scans selected text for verification directly on your local device.",
   "permissions": [
     "contextMenus",
-    "notifications"
+    "scripting",
+    "activeTab"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1:5050/*"
   ],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
