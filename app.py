@@ -25,6 +25,12 @@ import streamlit as st
 
 from model_utils import predict, get_word_importance, load_model
 
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+
+local_css("styles.css")
+
 try:
     from ddgs import DDGS
     DDGS_AVAILABLE = True
@@ -53,7 +59,7 @@ def render_highlighted_text(original_text: str, flagged_words: set) -> str:
         safe_tok = html.escape(tok)
         if bare in flagged_words:
             rendered.append(
-                f'<span style="background-color:#ff4b4b33; border-bottom:2px solid #ff4b4b; '
+                f'<span style="background-color:#ff5e5e33; border-bottom:2px solid #ff5e5e; '
                 f'border-radius:3px; padding:1px 2px;">{safe_tok}</span>'
             )
         else:
@@ -115,26 +121,58 @@ st.set_page_config(page_title="Fake News Detector Bot", page_icon="🔍", layout
 st.markdown(
     """
     <style>
+    .stApp {
+        background-color: #0a0a0c;
+    }
     .main .block-container { padding-top: 1.5rem; max-width: 720px; }
+
     .app-header {
         text-align: center; padding: 1.1rem 1rem 1.4rem 1rem; margin-bottom: 1rem;
-        border-radius: 14px; background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+        border-radius: 14px; background-color: #141414;
+        border: 1px solid #262626; border-left: 4px solid #6c5ce7;
     }
-    .app-header h1 { margin-bottom: 0.2rem; font-size: 1.8rem; }
-    .app-header p { color: #9ca3af; margin: 0; }
+    .app-header h1 { margin-bottom: 0.2rem; font-size: 1.8rem; color: #f4f4f5; }
+    .app-header p { color: #a1a1aa; margin: 0; }
     .badge-onDevice {
         display: inline-block; margin-top: 0.5rem; padding: 4px 12px;
-        border-radius: 999px; background-color: #064e3b; color: #6ee7b7;
+        border-radius: 999px; background-color: #0f2733; color: #00d2ff;
         font-size: 0.78rem; font-weight: 600;
     }
+
     .highlighted-box {
-        padding: 0.8rem 1rem; border-radius: 10px; background-color: #0b0f16;
-        border: 1px solid rgba(255,255,255,0.08); line-height: 1.7; font-size: 0.92rem;
-        margin-top: 0.5rem;
+        padding: 0.8rem 1rem; border-radius: 10px; background-color: #141414;
+        border: 1px solid #262626; border-left: 3px solid #ffb703;
+        line-height: 1.7; font-size: 0.92rem; margin-top: 0.5rem;
     }
     .source-link {
-        display:block; padding: 6px 0; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.06);
+        display:block; padding: 6px 0; font-size: 0.88rem;
+        border-bottom: 1px solid #262626; color: #00d2ff !important;
     }
+
+    .stButton > button {
+        background-color: #00d2ff;
+        color: #0a0a0c;
+        border-radius: 10px;
+        border: none;
+        font-weight: 700;
+    }
+    .stButton > button:hover {
+        background-color: #6c5ce7;
+        color: white;
+    }
+
+    [data-testid="stChatMessage"] {
+        background-color: #141414;
+        border: 1px solid #262626;
+        border-radius: 12px;
+    }
+
+    section[data-testid="stSidebar"] {
+        background-color: #111113;
+        border-right: 1px solid #262626;
+    }
+
+    ::selection { background-color: #6c5ce744; }
     </style>
     """,
     unsafe_allow_html=True,
