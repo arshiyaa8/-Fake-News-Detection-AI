@@ -34,7 +34,7 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
     })
     .then(response => response.json())
     .then(data => {
-      chrome.tabs.sendMessage(tab.id, { type: 'SHOW_RESULT', data }, () => {
+      chrome.tabs.sendMessage(tab.id, { type: 'SHOW_RESULT', data, originalText: selectedText }, () => {
         if (chrome.runtime.lastError) console.error(chrome.runtime.lastError.message);
       });
     })

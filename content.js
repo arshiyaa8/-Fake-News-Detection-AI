@@ -4,6 +4,7 @@ window.__dualAiGuardLoaded = true;
 let floatingWidget = null;
 let lastClickX = 120;
 let lastClickY = 120;
+let lastCheckedText = '';
 
 // Track where the user right-clicked, so we know where to place the panel
 document.addEventListener('contextmenu', (e) => {
@@ -22,6 +23,7 @@ function removeFloatingWidget() {
     floatingWidget.remove();
     floatingWidget = null;
   }
+  lastCheckedText = '';
 }
 
 function clampPosition(x, y, width) {
@@ -100,8 +102,9 @@ function createResultWidget(data) {
   `;
 
   const isFake = data.prediction && data.prediction.toLowerCase().includes('suspicious');
+  const isUncertain = data.prediction && data.prediction.toLowerCase().includes('uncertain');
   const isError = data.subject === 'Error' || data.subject === '';
-  const badgeColor = isError ? '#888' : (isFake ? '#e74c3c' : '#2ecc71');
+  const badgeColor = isError ? '#888' : (isUncertain ? '#7f8c8d' : (isFake ? '#e74c3c' : '#2ecc71'));
   const subjectIcon = data.subject === 'Finance' ? '💰' : data.subject === 'Health' ? '🩺' : '⚠️';
 
   widget.innerHTML = `
@@ -142,10 +145,56 @@ function createResultWidget(data) {
   makeDraggable(widget, document.getElementById('dag-header'));
 }
 
+function autoCheckSelection(text) {
+  lastCheckedText = text;
+  showLoadingWidget();
+
+  fetch('http://127.0.0.1:5050/predict', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text })
+  })
+  .then(response => response.json())
+  .then(data => createResultWidget(data))
+  .catch(error => {
+    console.error('Dual-AI Guard auto-check error:', error);
+    createResultWidget({
+      prediction: 'Server Unreachable',
+      probability: 0,
+      subject: '',
+      related: 'Ensure app.py is actively running on port 5050.'
+    });
+  });
+}
+
+// While the panel is open, automatically re-check whenever the user
+// selects a new piece of text — no right-click needed for follow-up checks.
+let selectionDebounceTimer = null;
+document.addEventListener('mouseup', () => {
+  if (!floatingWidget) return; // only auto-refresh while a panel is already showing
+
+  clearTimeout(selectionDebounceTimer);
+  selectionDebounceTimer = setTimeout(() => {
+    const selection = window.getSelection();
+    const text = selection ? selection.toString().trim() : '';
+
+    if (!text || text === lastCheckedText) return;
+
+    if (selection.rangeCount > 0) {
+      const rect = selection.getRangeAt(0).getBoundingClientRect();
+      lastClickX = rect.left;
+      lastClickY = rect.bottom + 10;
+    }
+
+    autoCheckSelection(text);
+  }, 400); // short debounce so it fires once the selection settles
+});
+
 chrome.runtime.onMessage.addListener((message) => {
   if (message.type === 'SHOW_LOADING') {
     showLoadingWidget();
   } else if (message.type === 'SHOW_RESULT') {
+    lastCheckedText = message.originalText || lastCheckedText;
     createResultWidget(message.data);
   } else if (message.type === 'SHOW_ERROR') {
     createResultWidget({

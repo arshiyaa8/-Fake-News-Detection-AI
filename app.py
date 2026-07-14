@@ -82,7 +82,12 @@ def predict():
             prob = health_model.predict_proba([cleaned_text])[0][pred_class]
             subject = "Health"
 
-        result_label = "Verified / Reliable" if pred_class == 1 else "Suspicious / Fake"
+        # If the model is close to a coin flip, be honest about it instead
+        # of forcing a confident-sounding label it doesn't actually have.
+        if prob < 0.65:
+            result_label = "Uncertain"
+        else:
+            result_label = "Real" if pred_class == 1 else "Suspicious"
         
         # FETCH RELATED NEWS FROM LOCAL OFFLINE DATASET (no internet used)
         related_context = get_related_news(raw_text, subject)
