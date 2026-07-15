@@ -1,7 +1,7 @@
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "verifyText",
-    title: "Verify Text with Dual-AI Guard",
+    title: "Verify Text with Verifi AI",
     contexts: ["selection"]
   });
 });

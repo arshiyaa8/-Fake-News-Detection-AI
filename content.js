@@ -118,7 +118,7 @@ function createResultWidget(data) {
       border-bottom: 1px solid #3a3a4a;
       border-radius: 10px 10px 0 0;
     ">
-      <span style="font-weight: 600;">${subjectIcon} Dual-AI Guard</span>
+      <span style="font-weight: 600;">${subjectIcon} Verifi AI</span>
       <span id="dag-close" style="cursor:pointer; padding: 0 4px; font-size: 18px; line-height: 1;">&times;</span>
     </div>
     <div style="padding: 14px;">
@@ -157,7 +157,7 @@ function autoCheckSelection(text) {
   .then(response => response.json())
   .then(data => createResultWidget(data))
   .catch(error => {
-    console.error('Dual-AI Guard auto-check error:', error);
+    console.error('Verifi AI auto-check error:', error);
     createResultWidget({
       prediction: 'Server Unreachable',
       probability: 0,

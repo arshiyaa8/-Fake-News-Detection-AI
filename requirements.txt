@@ -8,4 +8,9 @@ fastapi
 uvicorn
 requests
 duckduckgo-search
+<<<<<<< HEAD
 SpeechRecognition
+=======
+flask
+flask-cors
+>>>>>>> 5a4c955722dfc687a39bef36dea04c279819befc
