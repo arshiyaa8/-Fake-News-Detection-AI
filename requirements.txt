@@ -9,5 +9,3 @@ uvicorn
 requests
 duckduckgo-search
 SpeechRecognition
-flask
-flask-cors
