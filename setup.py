@@ -131,15 +131,36 @@ def open_extensions_page():
             print("Could not auto-open Chrome. Open it yourself and go to chrome://extensions")
 
 
+def open_extension_folder():
+    """
+    Also open the extension/ folder itself in the OS file browser, so the
+    person doesn't have to click through Desktop -> Verifi Ai -> extension
+    by hand in Chrome's folder picker. They can just drag it in, or hit
+    "Select Folder" straight from the window this opens.
+    """
+    try:
+        if sys.platform.startswith("win"):
+            os.startfile(str(EXTENSION_DIR))  # noqa: S606 - explicitly local path
+        elif sys.platform == "darwin":
+            subprocess.Popen(["open", str(EXTENSION_DIR)])
+        else:
+            subprocess.Popen(["xdg-open", str(EXTENSION_DIR)])
+    except Exception:
+        # Non-fatal - the printed instructions below still tell them the path
+        pass
+
+
 def print_extension_instructions():
     banner("Load the Chrome extension (one-time, ~15 seconds)")
     print(f"""
-1. In the tab that just opened, turn ON "Developer mode" (top-right toggle).
-2. Click "Load unpacked".
-3. Select this exact folder:
+A file browser window has also opened, showing the extension folder:
 
    {EXTENSION_DIR}
 
+1. In the Chrome tab that opened, turn ON "Developer mode" (top-right toggle).
+2. Click "Load unpacked".
+3. In the folder picker, navigate to (or paste) the path above, or drag
+   the folder from the file browser window that's already open.
 4. Done. Highlight any text on any webpage, right-click, and choose
    "Verify Text with Verifi AI".
 """)
@@ -152,6 +173,7 @@ def main():
     install_requirements()
     server_proc = start_server()
     open_extensions_page()
+    open_extension_folder()
     print_extension_instructions()
 
     if server_proc is None:
