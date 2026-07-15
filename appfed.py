@@ -12,7 +12,7 @@ labeled as optional/best-effort - it never runs unless the user turns
 it on, and the core on-device prediction always works without it.
 
 Run with:
-    streamlit run appbd.py
+    streamlit run appfed.py
 
 Note: this is a separate demo from the "Verifi AI" Chrome extension.
 This is a chat-style interface for pasting full headlines/articles;
