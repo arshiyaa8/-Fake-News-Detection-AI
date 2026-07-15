@@ -29,6 +29,13 @@ The extension does **not** request broad host permissions (e.g., access to all U
 - **Flask backend:** stateless per-request; models are loaded once into memory at startup and are not modified at runtime.
 - **Streamlit demo:** chat history is kept in Streamlit's `session_state`, which lives only for the duration of the browser session and is cleared on refresh or via the "Clear chat" button — it is not written to disk.
 
+## Limitations
+
+- Data handling claims in this document describe the project as designed and built; they have not been independently audited by a third party.
+- The "no data leaves the device" guarantee applies specifically to the core prediction path — it does not extend to the two explicitly opt-in features (voice transcription, online fact-check), which send data to third-party APIs when the user turns them on.
+- Local storage claims (e.g. Streamlit `session_state`) depend on the user not manually adding persistence — if the codebase is extended later to save history to disk or a database, this document should be updated to reflect that.
+- The extension's permission set is a template based on typical usage for this kind of tool; verify it against the live `manifest.json` before relying on it as an exact reference.
+
 ## Risks and mitigations
 
 | Risk | Mitigation |

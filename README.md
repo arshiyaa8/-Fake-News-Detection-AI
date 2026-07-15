@@ -6,7 +6,7 @@ Verifi AI is a misinformation detector with both **offline, on-device** and **on
 
 1. **Chrome Extension (Manifest V3)** — the primary submission. Right-click any selected text on any webpage and get an instant **Health** or **Finance** misinformation verdict from a local Flask backend running two offline ML models.
 2. **Streamlit Chatbot Demo** — a companion chat-style interface built around a TF-IDF + Logistic Regression fake-news classifier, trained on ~44,000 labeled news articles. Useful for showing the underlying model in a friendlier, conversational format, and includes an optional online fact-check feature.
-3. **Website Frontend** — a Next.js/React web app (see [Website Frontend](#website-frontend) below) that serves as the project's online-facing interface.
+3. **Website Frontend** — a Next.js/React web app (see [Quick Start — Website Frontend](#quick-start--website-frontend) below) that serves as the project's online-facing interface.
 
 The core ML verdict always runs **100% locally** with no internet connection required — the website frontend and the optional fact-check toggle are the parts of the project that use the internet.
 
@@ -236,7 +236,7 @@ Reusable low-level UI primitives (buttons, cards, etc., from shadcn/ui) live in 
 | Doc | Contents |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System diagram, model pipeline, data flow, local-vs-cloud comparison |
-| [TECHNICAL_REPORT.md](./TECHNICAL_REPORT.md) | Model/runtime details, file sizes, quantization rationale, CPU/GPU/NPU usage, benchmark script and results |
+| [TECHNICAL_REPORT.md](./TECHNICAL_REPORT.md) | Model/runtime, quantization rationale, model size, inference latency, CPU/GPU/NPU usage, peak memory, tested device specs, and the benchmark script |
 | [LOCAL_AI_VERIFICATION.md](./LOCAL_AI_VERIFICATION.md) | What runs fully on-device, what needs internet, and whether user data ever leaves the device |
 | [EVALUATION.md](./EVALUATION.md) | Accuracy methodology, baseline comparison, known failure cases |
 | [PRIVACY_AND_SAFETY.md](./PRIVACY_AND_SAFETY.md) | Data handling, extension permissions, storage, risks |

@@ -15,6 +15,16 @@ All datasets were used strictly for training a classifier for this hackathon sub
 
 **None.** No pretrained or third-party model weights were downloaded or fine-tuned. Both the health/finance models and the Streamlit demo model were **trained from scratch** on the datasets above using scikit-learn's `TfidfVectorizer` and `LogisticRegression`.
 
+## APIs
+
+| API | Used for | Required or optional |
+|---|---|---|
+| DuckDuckGo Search (`duckduckgo_search` library) | Best-effort online fact-check — finds related headlines | Optional, opt-in (Streamlit demo only) |
+| Google Web Speech API (via `SpeechRecognition` library) | Transcribes recorded voice input to text | Optional, opt-in (Streamlit demo only) |
+| Chrome Extensions API | Context menu integration, content script messaging | Required (extension only) |
+
+No paid or authenticated third-party APIs are used anywhere in the project. Both external APIs listed above are free, publicly accessible services and are never required for the core on-device verdict.
+
 ## Libraries and frameworks
 
 ### Backend (Flask + models)
