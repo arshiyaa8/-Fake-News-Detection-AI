@@ -1,239 +1,260 @@
-# 🛡️ Verifi AI — Offline Fake News Detector
+# Verifi AI 🔍
 
-Two tools, one goal: check whether text is reliable or suspicious,
-using ML models that run **entirely on your device** — no internet
-calls, no data leaving your machine.
+**OSDHack 2026 Submission — On-Device AI Theme**
 
-1. **Verifi AI (Chrome extension)** — the main submission. Right-click
-   any selected text on any webpage to check it instantly.
-2. **Fake News Detector Bot (Streamlit demo, `appfed.py`)** — an
-   optional chat-style interface where you paste a headline/article
-   and get a verdict with word-level explanations.
+Verifi AI is a misinformation detector with both **offline, on-device** and **online** features. It ships in three parts:
 
----
+1. **Chrome Extension (Manifest V3)** — the primary submission. Right-click any selected text on any webpage and get an instant **Health** or **Finance** misinformation verdict from a local Flask backend running two offline ML models.
+2. **Streamlit Chatbot Demo** — a companion chat-style interface built around a TF-IDF + Logistic Regression fake-news classifier, trained on ~44,000 labeled news articles. Useful for showing the underlying model in a friendlier, conversational format, and includes an optional online fact-check feature.
+3. **Website Frontend** — a Next.js/React web app (see [Website Frontend](#website-frontend) below) that serves as the project's online-facing interface.
 
-## ✨ Features
-
-- **Two specialized ML models** (extension) — separate TF-IDF +
-  Logistic Regression pipelines for Health and Finance/Crypto claims,
-  so each learns the vocabulary and patterns specific to its domain
-- **Automatic topic routing** — a keyword check decides which model
-  handles the selected text
-- **Right-click, on any page** — Chrome extension (Manifest V3), works
-  on any website via a context-menu item
-- **Floating result panel** — draggable, on-page panel showing the
-  verdict, confidence %, and topic — no OS notifications to hunt for
-- **Offline related-news matching** — cross-references selected text
-  against a local, sourced dataset of real health/finance
-  misinformation research (WHO, HHS, CIDRAP, Bitcoin Foundation,
-  Sumsub) via keyword overlap. Zero network calls.
-- **Local Flask backend** — single `/predict` endpoint, runs on
-  `127.0.0.1:5050`, nothing leaves your machine
-- **Word-level explanations** (Streamlit demo) — highlights which
-  specific words pushed a prediction toward "fake"
+The core ML verdict always runs **100% locally** with no internet connection required — the website frontend and the optional fact-check toggle are the parts of the project that use the internet.
 
 ---
 
-## 🚀 Quickstart — Verifi AI extension (main submission)
+## Why this exists
 
-**Requirements:** Python 3.8+ and Google Chrome installed.
-
-1. Download / unzip this repo
-2. Run the setup script for your OS **from the project root** (the
-   folder that directly contains `server/` and `extension/`):
-
-   | OS | How |
-   |---|---|
-   | Windows | double-click `setup.bat` |
-   | Mac / Linux | double-click `setup.sh`, or run `./setup.sh` in a terminal |
-   | Any OS | `python3 setup.py` (or `python setup.py`) |
-
-That's it. The script will:
-1. Create a virtual environment and install dependencies
-2. Start the backend on `http://127.0.0.1:5050`
-3. Open `chrome://extensions` **and** a file browser window pointed at
-   the `extension/` folder, so you don't have to click through folders
-   by hand
-
-Then, in the Chrome tab that opened:
-1. Toggle **Developer mode** on (top-right)
-2. Click **Load unpacked**
-3. Select the `extension/` folder (already open in the file browser —
-   drag it in, or just click Select Folder)
-
-Highlight any text on any webpage → right-click → **"Verify Text with
-Verifi AI."**
-
-Leave the terminal window open the whole time you're using it — that's
-your running backend. Closing it stops the server.
+Misinformation detection tools are usually cloud APIs: your text gets sent to a server you don't control. Verifi AI proves this doesn't have to be the case — the entire classification pipeline (TF-IDF vectorization + Logistic Regression inference) runs on-device, in a local Flask process, with no network calls required to produce a verdict.
 
 ---
 
-## 🤖 Optional: the Streamlit chat demo
-
-A separate, secondary demo — a chat-style interface for pasting full
-headlines/articles and getting a verdict with word-level explanations,
-plus an optional (internet-required) fact-check search.
-
-```
-cd streamlit-demo        # wherever appfed.py lives
-pip install -r requirements.txt
-streamlit run appfed.py
-```
-
-This is independent of the Verifi AI extension — different model
-files (`fake_news_model.pkl` + `tfidf_vectorizer.pkl`), different
-interface, not required for the main submission to work.
-
----
-
-## 📁 Repo structure
+## What's in this repo
 
 ```
 Verifi-AI/
-├── setup.py / setup.sh / setup.bat   ← one-click setup for the extension
-├── README.md
-├── server/
-│   ├── app.py                        ← Flask backend, /predict endpoint
-│   ├── requirements.txt
-│   ├── health_model.pkl              ← trained TF-IDF + LogisticRegression
-│   ├── finance_model.pkl             ← trained TF-IDF + LogisticRegression
-│   └── data/
-│       └── local_news.json           ← offline sourced misinformation dataset
-├── extension/
-│   ├── manifest.json                 ← Manifest V3 config
-│   ├── background.js                 ← context menu + fetch to backend
-│   ├── content.js                    ← floating result panel (on-page UI)
-│   └── icon.png
-└── streamlit-demo/                   ← optional, separate from main submission
-    ├── appfed.py
-    ├── model_utils.py
-    ├── fake_news_model.pkl
-    └── tfidf_vectorizer.pkl
+├── server/                  # Flask backend + ML models (extension backend)
+│   ├── app.py
+│   ├── health_model.pkl
+│   ├── finance_model.pkl
+│   ├── data/local_news.json
+│   └── requirements.txt
+├── extension/                # Chrome Manifest V3 extension
+│   ├── manifest.json
+│   ├── background.js
+│   └── content.js
+├── streamlit_demo/            # Companion chatbot demo (separate app.py)
+│   ├── app.py
+│   └── model_utils.py
+├── website/                   # Next.js web frontend (online-facing UI)
+│   ├── app/
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components/
+│   │   ├── ui/                  # shadcn/ui primitives
+│   │   ├── cta-footer.tsx
+│   │   ├── faq.tsx
+│   │   ├── features.tsx
+│   │   ├── hero.tsx
+│   │   ├── how-it-works.tsx
+│   │   ├── robot.tsx
+│   │   ├── robot-scene.tsx       # React Three Fiber 3D scene
+│   │   └── site-header.tsx
+│   ├── lib/
+│   │   └── utils.ts
+│   ├── public/
+│   │   ├── apple-icon.png
+│   │   ├── icon.ico
+│   │   ├── icon-dark-32x32.png
+│   │   ├── icon-light-32x32.png
+│   │   ├── placeholder.jpg
+│   │   ├── placeholder.ico
+│   │   ├── placeholder-logo.png
+│   │   ├── placeholder-logo.ico
+│   │   └── placeholder-user.jpg
+│   ├── .gitignore
+│   ├── package.json
+│   ├── pnpm-lock.yaml
+│   ├── tsconfig.json
+│   ├── next.config.mjs
+│   ├── postcss.config.mjs
+│   └── components.json
+├── setup.py                  # Cross-platform setup logic
+├── setup.sh                  # macOS/Linux wrapper
+├── setup.bat                 # Windows wrapper
+├── README.md                  # You are here
+├── ARCHITECTURE.md
+├── TECHNICAL_REPORT.md
+├── EVALUATION.md
+├── PRIVACY_AND_SAFETY.md
+├── ATTRIBUTION.md
 ```
 
-**Important:** the extension files (`manifest.json`, `background.js`,
-`content.js`, `icon.png`) must sit **directly inside** `extension/` —
-not nested in a further subfolder. Chrome's "Load unpacked" only looks
-one level deep for `manifest.json`.
+> ⚠️ **Note:** the Streamlit demo's backend file is also named `app.py`. Keep it in its own `streamlit_demo/` folder, separate from `server/app.py` — if the two ever land in the same directory, one will silently overwrite the other.
 
 ---
 
-## 🧠 How the extension works
+## Quick Start — Chrome Extension (main submission)
 
+### 1. One-click setup
+
+From the **project root** (the folder containing both `server/` and `extension/`):
+
+**Windows:**
 ```
-Select text on any page
-        │
-        ▼
-Right-click → "Verify Text with Verifi AI"
-        │
-        ▼
-background.js → POST http://127.0.0.1:5050/predict
-        │
-        ▼
-app.py: keyword router decides Health vs Finance
-        │
-        ▼
-TF-IDF + Logistic Regression model → prediction + confidence
-        │
-        ▼
-Local keyword match against data/local_news.json → related sources
-        │
-        ▼
-content.js renders a draggable result panel on the page
+setup.bat
 ```
 
----
+**macOS/Linux:**
+```
+./setup.sh
+```
 
-## 🔧 Manual setup (if you'd rather not run the script)
+This automatically:
+- Checks your Python version
+- Creates a virtual environment in `server/venv`
+- Installs everything in `server/requirements.txt`
+- Verifies all required files exist (`app.py`, both `.pkl` models, `data/local_news.json`, extension files) and fails early with a clear message if anything's missing
+- Starts the Flask server on `127.0.0.1:5050` and waits until it responds
+- Opens `chrome://extensions` and a file browser pointed at the `extension/` folder
 
-```bash
+### 2. Load the extension in Chrome
+
+1. In the `chrome://extensions` tab that opened automatically, toggle on **Developer mode** (top right).
+2. Click **Load unpacked**.
+3. Select the `extension` folder (the file browser window that opened points right at it).
+4. You should see a **"Verifi AI"** card appear in your extensions list.
+
+### 3. Use it
+
+Highlight any text on any webpage → right-click → **"Verify Text with Verifi AI"** → a panel appears on the page with the verdict and confidence score.
+
+### Manual setup (if `setup.bat`/`setup.sh` doesn't work on your system)
+
+```
 cd server
-python3 -m venv venv
-source venv/bin/activate      # Windows: venv\Scripts\activate
+python -m venv venv
+venv\Scripts\activate        # Windows
+source venv/bin/activate     # macOS/Linux
 pip install -r requirements.txt
 python app.py
 ```
-
-Then load `extension/` unpacked as described above.
-
----
-
-## 🩺 Known limitation (in progress)
-
-The **Health model's accuracy is weaker** than the Finance model's.
-Root cause: it was originally trained on a generic 2017
-political-news dataset, not real health claims — it had effectively
-learned "articles that don't mention money," not health
-misinformation patterns. It's since been retrained on the CoAID
-COVID-19 dataset, which improved things but is small and imbalanced
-(56 fake vs. 1,009 real examples). Retraining on a larger, balanced
-dataset (CONSTRAINT COVID-19 Fake News, ~10,700 items, ~52/48 split)
-is in progress. The **Finance/crypto-scam model is trained on a
-balanced 10,000-message dataset and evaluates around 98.5% accuracy**
-on held-out test data.
+Then load the extension manually as in step 2 above.
 
 ---
 
-## 🐛 Troubleshooting
+## Quick Start — Streamlit Chatbot Demo
+
+This is a separate, optional companion app: a chat-style interface around the same TF-IDF + Logistic Regression fake-news model.
+
+```
+cd streamlit_demo
+pip install -r requirements.txt
+streamlit run app.py
+```
+
+Then open the local URL Streamlit prints (typically `http://localhost:8501`).
+
+**Features:**
+- 🧠 Paste a headline or article, get a `REAL`/`FAKE` verdict with a confidence meter — runs entirely on-device
+- 🔍 **"Explain WHY"** toggle — highlights the specific words that pushed the prediction, with a plain-English explanation
+- 🎤 Optional voice input (needs the `SpeechRecognition` package; needs internet for transcription)
+- 🌐 Optional **"online fact-check"** toggle — best-effort web search for similar headlines via DuckDuckGo. This is clearly optional, off by default, and only used to surface related coverage — it never replaces or gates the core on-device prediction
+
+> Core prediction (steps 1–3 of the model pipeline) always runs offline. The only two features that need internet are voice transcription and the optional online fact-check toggle, and both are opt-in.
+
+---
+
+## Quick Start — Website Frontend
+
+A **Next.js 16 / React 19 / TypeScript** web app that provides the project's online-facing interface. It was scaffolded and built using **[v0](https://v0.dev)** (Vercel's AI UI builder), with:
+
+- **Tailwind CSS v4** + **shadcn/ui** (`base-nova` style, `neutral` base color) for the UI
+- **Lucide** for icons
+- **React Three Fiber** + **drei** + **three.js** for 3D visual elements
+- **pnpm** as the package manager (lockfile version 9.0)
+- **@vercel/analytics** for usage analytics
+
+### Setup and run
+
+```
+cd website
+pnpm install
+pnpm dev
+```
+
+Then open `http://localhost:3000`.
+
+**Other scripts:**
+```
+pnpm build     # production build
+pnpm start     # run the production build
+pnpm lint      # lint the codebase
+```
+
+### Page structure
+
+The landing page (`app/page.tsx`) is composed of the following sections, in order:
+
+1. `site-header.tsx` — navigation header
+2. `hero.tsx` — hero section, paired with `robot-scene.tsx` (an interactive 3D robot built with React Three Fiber + drei)
+3. `features.tsx` — feature highlights
+4. `how-it-works.tsx` — pipeline walkthrough
+5. `faq.tsx` — frequently asked questions
+6. `cta-footer.tsx` — call-to-action + footer
+
+Reusable low-level UI primitives (buttons, cards, etc., from shadcn/ui) live in `components/ui/`. Shared helper functions live in `lib/utils.ts`.
+
+### Notes
+
+- `next.config.mjs` sets `typescript.ignoreBuildErrors: true` and `images.unoptimized: true`, so the build won't fail on type errors and images are served unoptimized (useful for quick hackathon deploys, e.g. static export or Vercel).
+- Path alias `@/*` is configured in `tsconfig.json`, matching the `@/components`, `@/lib`, `@/hooks`, and `@/components/ui` aliases in `components.json`.
+- The `pnpm.overrides` field in `package.json` pins `hono` to `4.12.25` to avoid a dependency conflict.
+- `.gitignore` excludes `node_modules`, `.next/`, `.DS_Store`, local env files (`.env*.local`), the Vercel CLI folder (`.vercel/`), and v0 sandbox-only files (`__v0_runtime_loader.js`, `__v0_devtools.tsx`, `__v0_jsx-dev-runtime.ts`, `.snowflake/`, `.v0-trash/`) — none of these should be committed or included in your submission zip.
+- Because the app was built in v0's sandbox, double-check before zipping that no leftover `__v0_*` files or `.v0-trash/` folders accidentally got included outside of what `.gitignore` already excludes.
+
+---
+
+## Sample input/output
+
+**Input:** `"Scientists confirm drinking bleach cures COVID-19 overnight"`
+**Output:** 🚫 **FAKE** — Confidence: ~94%
+**Why:** flagged largely due to words statistically more common in fake articles in the training data (e.g. sensational health claims, absolute language like "cures" and "overnight").
+
+**Input:** `"Federal Reserve raises interest rates by 0.25% following July meeting"`
+**Output:** ✅ **REAL** — Confidence: ~88%
+
+---
+
+## Requirements
+
+**Extension + Streamlit demo (offline components):**
+- Python 3.9+
+- Google Chrome (for the extension)
+- See `server/requirements.txt` and `streamlit_demo/requirements.txt` for exact package lists
+
+**Website frontend (online component):**
+- Node.js (compatible with Next.js 16 / React 19)
+- [pnpm](https://pnpm.io/) package manager
+- See `website/package.json` for exact package versions
+
+---
+
+## Further documentation
+
+| Doc | Contents |
+|---|---|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | System diagram, model pipeline, data flow, local-vs-cloud comparison |
+| [TECHNICAL_REPORT.md](./TECHNICAL_REPORT.md) | Model/runtime details, file sizes, quantization rationale, benchmark script and results |
+| [EVALUATION.md](./EVALUATION.md) | Accuracy methodology, baseline comparison, known failure cases |
+| [PRIVACY_AND_SAFETY.md](./PRIVACY_AND_SAFETY.md) | Data handling, extension permissions, storage, risks |
+| [ATTRIBUTION.md](./ATTRIBUTION.md) | Datasets, libraries used, licensing |
+| [DEMO_VIDEO_SCRIPT.md](./DEMO_VIDEO_SCRIPT.md) | Shot list for the submission demo video |
+
+---
+
+## Troubleshooting
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| "Server Unreachable" in the panel | Backend isn't running, or crashed on startup | Run `setup.py`/`setup.bat` again from the project root and watch the terminal for errors |
-| `ModuleNotFoundError: No module named 'flask'` in the terminal | `requirements.txt` is missing `flask`/`flask-cors` | Add both to `server/requirements.txt`, delete `server/venv`, re-run setup |
-| "Manifest file is missing or unreadable" when loading the extension | Selected the wrong folder — `manifest.json` must be directly inside the folder you pick | In "Load unpacked," select `extension/` itself, not its parent folder |
-| "Missing required files" when running `setup.py` | Script was run from inside `server/` instead of the project root | `cd ..` back to the folder that contains both `server/` and `extension/`, then re-run |
-| No "Verify Text with Verifi AI" menu item on right-click | Extension not loaded yet, or page is a restricted Chrome page | Reload the extension at `chrome://extensions`; test on a normal webpage, not `chrome://` pages or PDFs |
-| Right-click menu appears, but nothing happens after clicking it | Extension files were edited but not reloaded | Go to `chrome://extensions`, click the reload icon on the Verifi AI card, then refresh the webpage |
-| "Could not establish connection, receiving end does not exist" | Page was open before the extension loaded | Refresh the tab, or re-select the text and try again |
-| `local_news.json not found` warning in server logs | File missing or misnamed | Confirm it's exactly `server/data/local_news.json` (lowercase, underscore) |
-| `pip install` fails | Python version too old | Install Python 3.8+ from python.org |
+| `ModuleNotFoundError: No module named 'flask'` | Missing dependency | Run setup again — `flask` and `flask-cors` are listed in `requirements.txt` |
+| "Manifest file is missing or unreadable" | Wrong folder selected in "Load unpacked" | Make sure `manifest.json` sits directly inside `extension/`, not nested one level deeper |
+| "Missing required files" during setup | Setup script run from the wrong directory | Always run `setup.py`/`setup.sh`/`setup.bat` from the project root (the folder containing both `server/` and `extension/`) |
+| cmd window closes immediately after double-clicking `setup.bat` | Normal behavior on completion/error | For debugging, open Command Prompt manually, `cd` into the project folder, then run `setup.bat` from there |
+| "Server Unreachable" in the extension panel | Flask server isn't running yet | Re-run setup and confirm the terminal shows the server listening on `127.0.0.1:5050` before using the extension |
 
 ---
 
-## 🧪 Sample inputs & expected outputs
+## License
 
-Try these directly (select the text on any webpage, or paste into the
-Streamlit demo):
-
-| Input text | Expected topic | Expected verdict (approximate) |
-|---|---|---|
-| "Researchers publish new peer-reviewed findings on vaccine effectiveness in a large clinical trial" | Health | Reliable/Real, moderate-high confidence |
-| "Miracle cure eliminates all disease overnight, doctors hate this one trick" | Health | Suspicious, moderate-high confidence |
-| "The Federal Reserve announced it will hold interest rates steady this quarter" | Finance | Reliable/Real, high confidence |
-| "Guaranteed 500% returns in 24 hours, send Bitcoin now to double your money" | Finance | Suspicious, high confidence |
-| "asdf test 123" | Either (short text, low signal) | Likely "Uncertain" — see `EVALUATION.md` on short-text limitations |
-
-Expected JSON shape from the `/predict` endpoint directly (e.g. via
-`curl` or the extension's network call):
-
-```json
-{
-  "prediction": "Suspicious",
-  "probability": 0.87,
-  "subject": "Finance",
-  "related": "\n\n📰 Related (offline dataset, real sourced articles):\n- ... (headline) (source)"
-}
-```
-
----
-
-## 📄 Additional submission documents
-
-| File | Contents |
-|---|---|
-| [`ARCHITECTURE.md`](ARCHITECTURE.md) | System diagram, model pipeline, data flow, local/cloud component breakdown, key design decisions |
-| [`TECHNICAL_REPORT.md`](TECHNICAL_REPORT.md) | Model/runtime details, model size, latency/memory benchmarking script |
-| [`EVALUATION.md`](EVALUATION.md) | Accuracy results, evaluation method, baseline comparison, known failure cases |
-| [`PRIVACY_AND_SAFETY.md`](PRIVACY_AND_SAFETY.md) | Data handling, extension permissions, storage, limitations, risks |
-| [`ATTRIBUTION.md`](ATTRIBUTION.md) | Datasets, libraries, and prior work used |
-
----
-
-## 📊 Data sources
-
-`data/local_news.json` contains paraphrased, sourced summaries from
-public health/finance misinformation research, including WHO, HHS,
-CIDRAP, the Bitcoin Foundation, and Sumsub. No live API calls are
-made at runtime — this is a static, offline dataset by design, to
-meet the offline/on-device requirement of this project.
+See `LICENSE` in the project root.
