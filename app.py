@@ -12,12 +12,7 @@ labeled as optional/best-effort - it never runs unless the user turns
 it on, and the core on-device prediction always works without it.
 
 Run with:
-    streamlit run appfed.py
-
-Note: this is a separate demo from the "Verifi AI" Chrome extension.
-This is a chat-style interface for pasting full headlines/articles;
-Verifi AI is a right-click-on-any-webpage extension with its own
-Flask backend. They are independent tools in this submission.
+    streamlit run app.py
 """
 
 import html
@@ -32,6 +27,12 @@ try:
     DDGS_AVAILABLE = True
 except ImportError:
     DDGS_AVAILABLE = False
+
+try:
+    import speech_recognition as sr
+    SR_AVAILABLE = True
+except ImportError:
+    SR_AVAILABLE = False
 
 
 @st.cache_resource
@@ -74,29 +75,55 @@ def build_explanation_sentence(flagged_words: list) -> str:
 
 
 def confidence_bar_html(confidence: float, label: str) -> str:
-    """Render a colored horizontal confidence meter."""
+    """Render a colored horizontal confidence meter.
+
+    NOTE: every line here starts at column 0 on purpose. Markdown treats
+    any line indented 4+ spaces as a code block, which would otherwise
+    make Streamlit print this HTML as raw text instead of rendering it.
+    """
     pct = max(0, min(100, int(confidence * 100)))
     color = "#22c55e" if label == "REAL" else "#ef4444"
-    return f"""
-    <div style="background:#1f2937; border-radius:8px; height:10px; margin-top:8px; overflow:hidden;">
-        <div style="width:{pct}%; background:{color}; height:100%; transition: width 0.4s ease;"></div>
-    </div>
-    <p style="color:#9ca3af; font-size:0.82rem; margin-top:4px; margin-bottom:0;">Confidence: {confidence:.1%}</p>
-    """
+    return (
+        f'<div style="background:#1f2937; border-radius:8px; height:10px; margin-top:8px; overflow:hidden;">'
+        f'<div style="width:{pct}%; background:{color}; height:100%; transition: width 0.4s ease;"></div>'
+        f'</div>'
+        f'<p style="color:#9ca3af; font-size:0.82rem; margin-top:4px; margin-bottom:0;">Confidence: {confidence:.1%}</p>'
+    )
 
 
 def verdict_card_html(label: str, confidence: float, icon: str) -> str:
-    """Render the top-level REAL/FAKE verdict as a styled card."""
+    """Render the top-level REAL/FAKE verdict as a styled card.
+
+    Same rule as above: no leading indentation on any line.
+    """
     is_real = label == "REAL"
     bg = "#052e1a" if is_real else "#3b0a0a"
     border = "#22c55e" if is_real else "#ef4444"
-    return f"""
-    <div style="border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.6rem;
-                background:{bg}; border:1px solid {border};">
-        <div style="font-size:1.35rem; font-weight:700; letter-spacing:0.3px;">{icon} {label}</div>
-        {confidence_bar_html(confidence, label)}
-    </div>
+    bar = confidence_bar_html(confidence, label)
+    return (
+        f'<div style="border-radius:12px; padding:1rem 1.2rem; margin-bottom:0.6rem; '
+        f'background:{bg}; border:1px solid {border};">'
+        f'<div style="font-size:1.35rem; font-weight:700; letter-spacing:0.3px;">{icon} {label}</div>'
+        f'{bar}'
+        f'</div>'
+    )
+
+
+def transcribe_audio(audio_file):
     """
+    Transcribe a recorded audio clip to text using Google's free Web
+    Speech API. Needs internet (like the online fact-check toggle) -
+    returns None on any failure so the caller can show a friendly error.
+    """
+    if not SR_AVAILABLE:
+        return None
+    recognizer = sr.Recognizer()
+    try:
+        with sr.AudioFile(audio_file) as source:
+            audio_data = recognizer.record(source)
+        return recognizer.recognize_google(audio_data)
+    except Exception:
+        return None
 
 
 def try_online_fact_check(query: str, max_results: int = 3):
@@ -188,7 +215,7 @@ st.markdown(
         <div class="feature-card"><span class="emoji">🧠</span>ML-based<br>verdicts</div>
         <div class="feature-card"><span class="emoji">🔒</span>Runs fully<br>offline</div>
         <div class="feature-card"><span class="emoji">🔍</span>Word-level<br>explanations</div>
-        <div class="feature-card"><span class="emoji">🌐</span>Optional<br>fact-check</div>
+        <div class="feature-card"><span class="emoji">🎤</span>Voice or<br>text input</div>
     </div>
     """,
     unsafe_allow_html=True,
@@ -226,29 +253,33 @@ computer unless you turn on the online fact-check toggle.
         st.rerun()
 
 
-@st.dialog("🧩 Add as browser extension")
+@st.dialog("🧩 Add this as a browser extension")
 def show_extension_guide():
     st.markdown(
         """
-Good news — this already exists as a real, working Chrome extension
-called **Verifi AI**, separate from this Streamlit chat demo. It runs
-its own lightweight Flask backend instead of Streamlit, and lets you
-right-click any selected text on **any webpage** to check it, rather
-than pasting text into a chat window here.
+This app runs as a local Streamlit web app, not a packaged browser
+extension — but you can wrap it so it opens like one. Two common
+approaches:
 
-**To use it:**
-1. Open the `Verifi Ai` project folder (not this Streamlit app).
-2. Double-click `setup.bat` (Windows) or `setup.sh` (Mac/Linux) — this
-   starts the backend and opens Chrome's extensions page for you.
-3. In that Chrome tab, turn on **Developer mode**, click
-   **Load unpacked**, and select the `extension/` folder.
-4. Highlight text on any page, right-click, and choose
-   **"Verify Text with Verifi AI."**
+**Option A — Quick shortcut (easiest)**
+1. Keep `streamlit run app.py` running in a terminal.
+2. In Chrome/Edge, open `localhost:8501`.
+3. Click the **⋮ menu → Cast, save, and share → Install page as app**
+   (Chrome) or **App available** icon in the address bar (Edge).
+4. It'll now open in its own window like a real app/extension, with an icon
+   you can pin to your taskbar.
 
-This Streamlit chat app and the Verifi AI extension are two separate
-tools in this submission — this one is a chat-style interface for
-pasting full headlines/articles, while the extension checks text
-directly on the page you're already reading.
+**Option B — True browser extension (more work)**
+1. Build a minimal `manifest.json` (Manifest V3) that defines a popup.
+2. Have the popup's HTML embed an `<iframe>` pointing at your running
+   Streamlit server (`http://localhost:8501`), or rewrite the core
+   prediction logic in JavaScript so it doesn't need a Python server at all.
+3. Load it unpacked via `chrome://extensions` → **Developer mode** →
+   **Load unpacked**.
+
+Option A gets you an app-like icon in minutes. Option B is a real
+extension but means re-architecting the prediction step to run without a
+Python backend, since extensions can't launch local servers on their own.
         """
     )
     if st.button("Got it", use_container_width=True):
@@ -298,7 +329,28 @@ for msg in st.session_state.messages:
     with st.chat_message(msg["role"], avatar=avatar):
         st.markdown(msg["content"], unsafe_allow_html=True)
 
-user_input = st.chat_input("Paste a news headline or article...")
+with st.expander("🎤 Or use your microphone"):
+    if not SR_AVAILABLE:
+        st.caption(
+            "Voice input needs the `SpeechRecognition` package. Add "
+            "`SpeechRecognition` to your `requirements.txt` and reinstall to enable this."
+        )
+    else:
+        st.caption("🌐 Voice-to-text needs internet (like the fact-check toggle). The core prediction itself still runs on-device.")
+        mic_audio = st.audio_input("Record a headline")
+        if mic_audio is not None:
+            if st.button("Use this recording", use_container_width=True):
+                with st.spinner("Transcribing..."):
+                    transcript = transcribe_audio(mic_audio)
+                if transcript:
+                    st.session_state.pending_input = transcript
+                    st.rerun()
+                else:
+                    st.error("Couldn't understand that recording — try again, speaking clearly.")
+
+typed_input = st.chat_input("Paste a news headline or article...")
+
+user_input = st.session_state.pop("pending_input", None) or typed_input
 
 if user_input:
     st.session_state.messages.append({"role": "user", "content": html.escape(user_input)})
