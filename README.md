@@ -75,9 +75,10 @@ Verifi-AI/
 ├── README.md                  # You are here
 ├── ARCHITECTURE.md
 ├── TECHNICAL_REPORT.md
+├── LOCAL_AI_VERIFICATION.md
 ├── EVALUATION.md
 ├── PRIVACY_AND_SAFETY.md
-├── ATTRIBUTION.md
+└── ATTRIBUTION.md
 ```
 
 > ⚠️ **Note:** the Streamlit demo's backend file is also named `app.py`. Keep it in its own `streamlit_demo/` folder, separate from `server/app.py` — if the two ever land in the same directory, one will silently overwrite the other.
@@ -235,11 +236,11 @@ Reusable low-level UI primitives (buttons, cards, etc., from shadcn/ui) live in 
 | Doc | Contents |
 |---|---|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | System diagram, model pipeline, data flow, local-vs-cloud comparison |
-| [TECHNICAL_REPORT.md](./TECHNICAL_REPORT.md) | Model/runtime details, file sizes, quantization rationale, benchmark script and results |
+| [TECHNICAL_REPORT.md](./TECHNICAL_REPORT.md) | Model/runtime details, file sizes, quantization rationale, CPU/GPU/NPU usage, benchmark script and results |
+| [LOCAL_AI_VERIFICATION.md](./LOCAL_AI_VERIFICATION.md) | What runs fully on-device, what needs internet, and whether user data ever leaves the device |
 | [EVALUATION.md](./EVALUATION.md) | Accuracy methodology, baseline comparison, known failure cases |
 | [PRIVACY_AND_SAFETY.md](./PRIVACY_AND_SAFETY.md) | Data handling, extension permissions, storage, risks |
 | [ATTRIBUTION.md](./ATTRIBUTION.md) | Datasets, libraries used, licensing |
-| [DEMO_VIDEO_SCRIPT.md](./DEMO_VIDEO_SCRIPT.md) | Shot list for the submission demo video |
 
 ---
 

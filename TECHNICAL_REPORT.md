@@ -27,6 +27,26 @@ ls -lh server/health_model.pkl server/finance_model.pkl
 
 **Not applicable / not needed.** These are TF-IDF + Logistic Regression models, not neural networks — there are no floating-point weight matrices large enough to benefit from quantization. The entire model (vocabulary + sparse coefficient vector) is already small enough (typically low single-digit megabytes or less) to load instantly on any consumer device, which is why no compression step was needed to meet the on-device constraint.
 
+## CPU / GPU / NPU usage
+
+**CPU only — no GPU or NPU required at any point.**
+
+- Both training (originally, offline) and inference (at runtime) use scikit-learn's `LogisticRegression`, which performs a sparse vector–matrix multiplication against the TF-IDF features. This is lightweight enough to run on a single CPU core in well under a millisecond of actual compute per prediction.
+- No PyTorch, TensorFlow, ONNX Runtime, or any GPU-accelerated framework is used anywhere in the pipeline.
+- This is a deliberate design choice for the on-device theme: it guarantees the project runs identically on any judge's laptop, regardless of whether they have a dedicated GPU or NPU available.
+
+## Tested device specifications
+
+> ⚠️ Fill in with the actual machine(s) you tested on:
+
+| Spec | Value |
+|---|---|
+| OS | `[FILL IN — e.g. Windows 11 / macOS Sonoma]` |
+| CPU | `[FILL IN — e.g. Intel i5-1235U / Apple M2]` |
+| RAM | `[FILL IN]` |
+| GPU | Not used (CPU-only inference) |
+| Python version | `[FILL IN]` |
+
 ## Runtime environment
 
 - **Language:** Python 3.9+
@@ -115,7 +135,8 @@ pip install psutil --break-system-packages
 | Median latency | `[FILL IN]` ms |
 | Min / Max latency | `[FILL IN]` / `[FILL IN]` ms |
 | Flask process memory (RSS) | `[FILL IN]` MB |
-| Test machine (CPU/RAM/OS) | `[FILL IN]` |
+
+(See "Tested device specifications" above for the machine this was measured on.)
 
 ## Why no cloud inference
 
