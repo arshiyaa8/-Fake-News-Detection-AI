@@ -8,3 +8,5 @@ fastapi
 uvicorn
 requests
 duckduckgo-search
+flask
+flask-cors

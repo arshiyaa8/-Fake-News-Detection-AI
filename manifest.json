@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Offline Science & Finance Guard",
+  "name": "Verifi AI",
   "version": "1.0",
-  "description": "Scans selected text for verification directly on your local device.",
+  "description": "Verifi AI scans selected text for verification directly on your local device.",
   "permissions": [
     "contextMenus",
     "scripting",
