@@ -191,6 +191,45 @@ on held-out test data.
 
 ---
 
+## 🧪 Sample inputs & expected outputs
+
+Try these directly (select the text on any webpage, or paste into the
+Streamlit demo):
+
+| Input text | Expected topic | Expected verdict (approximate) |
+|---|---|---|
+| "Researchers publish new peer-reviewed findings on vaccine effectiveness in a large clinical trial" | Health | Reliable/Real, moderate-high confidence |
+| "Miracle cure eliminates all disease overnight, doctors hate this one trick" | Health | Suspicious, moderate-high confidence |
+| "The Federal Reserve announced it will hold interest rates steady this quarter" | Finance | Reliable/Real, high confidence |
+| "Guaranteed 500% returns in 24 hours, send Bitcoin now to double your money" | Finance | Suspicious, high confidence |
+| "asdf test 123" | Either (short text, low signal) | Likely "Uncertain" — see `EVALUATION.md` on short-text limitations |
+
+Expected JSON shape from the `/predict` endpoint directly (e.g. via
+`curl` or the extension's network call):
+
+```json
+{
+  "prediction": "Suspicious",
+  "probability": 0.87,
+  "subject": "Finance",
+  "related": "\n\n📰 Related (offline dataset, real sourced articles):\n- ... (headline) (source)"
+}
+```
+
+---
+
+## 📄 Additional submission documents
+
+| File | Contents |
+|---|---|
+| [`ARCHITECTURE.md`](ARCHITECTURE.md) | System diagram, model pipeline, data flow, local/cloud component breakdown, key design decisions |
+| [`TECHNICAL_REPORT.md`](TECHNICAL_REPORT.md) | Model/runtime details, model size, latency/memory benchmarking script |
+| [`EVALUATION.md`](EVALUATION.md) | Accuracy results, evaluation method, baseline comparison, known failure cases |
+| [`PRIVACY_AND_SAFETY.md`](PRIVACY_AND_SAFETY.md) | Data handling, extension permissions, storage, limitations, risks |
+| [`ATTRIBUTION.md`](ATTRIBUTION.md) | Datasets, libraries, and prior work used |
+
+---
+
 ## 📊 Data sources
 
 `data/local_news.json` contains paraphrased, sourced summaries from
