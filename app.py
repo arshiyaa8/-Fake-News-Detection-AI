@@ -257,29 +257,71 @@ computer unless you turn on the online fact-check toggle.
 def show_extension_guide():
     st.markdown(
         """
-This app runs as a local Streamlit web app, not a packaged browser
-extension — but you can wrap it so it opens like one. Two common
-approaches:
+There are two ways to use this outside of this chat window, depending on
+whether you're okay running a terminal in the background.
 
-**Option A — Quick shortcut (easiest)**
-1. Keep `streamlit run app.py` running in a terminal.
-2. In Chrome/Edge, open `localhost:8501`.
-3. Click the **⋮ menu → Cast, save, and share → Install page as app**
-   (Chrome) or **App available** icon in the address bar (Edge).
-4. It'll now open in its own window like a real app/extension, with an icon
-   you can pin to your taskbar.
+---
 
-**Option B — True browser extension (more work)**
-1. Build a minimal `manifest.json` (Manifest V3) that defines a popup.
-2. Have the popup's HTML embed an `<iframe>` pointing at your running
-   Streamlit server (`http://localhost:8501`), or rewrite the core
-   prediction logic in JavaScript so it doesn't need a Python server at all.
-3. Load it unpacked via `chrome://extensions` → **Developer mode** →
-   **Load unpacked**.
+### 🖥️ Option A — Real extension (needs the terminal running)
+This gives you a genuine right-click-to-verify tool on **any website** —
+not just this chat page. It needs its own backend running locally, so a
+terminal window has to stay open in the background while you use it.
 
-Option A gets you an app-like icon in minutes. Option B is a real
-extension but means re-architecting the prediction step to run without a
-Python backend, since extensions can't launch local servers on their own.
+1. Open the `Verifi Ai` project folder (wherever you saved it — this is a
+   separate project from this Streamlit chat app).
+2. Double-click `setup.bat` (Windows) or `setup.sh` (Mac/Linux). A terminal
+   window opens — **leave it running**, it powers the extension.
+3. Wait 30–60 seconds on first run while it installs what it needs. Two
+   windows will then open automatically: a `chrome://extensions` tab, and
+   a folder window.
+4. In the `chrome://extensions` tab, turn on **Developer mode** (top right).
+5. Click **Load unpacked**, then select the `extension` folder (the folder
+   window from step 3 shows you exactly which one).
+6. You should now see a **"Verifi AI"** card on the extensions page — it's ready.
+7. On any webpage, highlight some text, right-click it, and choose
+   **"Verify Text with Verifi AI"**. A small panel shows the verdict and
+   confidence score right there on the page.
+8. When you're done, just close the terminal from step 2 — that shuts it down.
+
+---
+
+### 🌐 Option B — Directly in the browser (no terminal at all)
+Simpler, but limited to this chat page rather than working on every site
+you visit.
+
+1. Keep `streamlit run app.py` running once, in one terminal, as usual.
+2. In Chrome or Edge, open `localhost:8501` (or your deployed
+   `verifyx.streamlit.app` link).
+3. Click **⋮ menu → Cast, save, and share → Install page as app** (Chrome),
+   or the **App available** icon in the address bar (Edge).
+4. It now opens in its own window with a pinnable taskbar icon, like a
+   real app — but it's still just this chat interface, not a right-click
+   tool for other websites.
+
+---
+
+**In short:** Option A is a true right-click extension that works on
+every website, but needs a terminal running in the background. Option B
+is easiest and needs no terminal, but only works on this one page.
+
+---
+
+### ☁️ Option C — Chrome extension pointing at the live site (no terminal, no backend to run)
+Since this app is already deployed at **verifyx.streamlit.app**, you can
+package a tiny Chrome extension whose toolbar button just opens the live
+site in a popup — nothing to install or run locally, because the backend
+is already running in the cloud.
+
+1. Download the extension folder (two files: `manifest.json` and
+   `popup.html`).
+2. Go to `chrome://extensions` and turn on **Developer mode** (top right).
+3. Click **Load unpacked**, and select that folder.
+4. Pin the new **VerifyX** icon to your toolbar (puzzle-piece icon →
+   pin). Click it any time to get the detector in a popup, with an
+   "Open full tab ↗" link if you want more room.
+
+This is the simplest of the three: no terminal, no `setup.bat`, nothing
+running on your machine — just a shortcut to your already-live app.
         """
     )
     if st.button("Got it", use_container_width=True):
